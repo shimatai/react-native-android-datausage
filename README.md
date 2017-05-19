@@ -39,7 +39,10 @@ There are many ways to do this, here's the way I do it:
             }
         }
         ```
-2. Simply `import/require` it by the name defined in your library's `package.json`:
+
+2. Do `npm install --save git+https://github.com/shimatai/react-native-android-datausage.git` in your React Native main project.
+
+3. Simply `import/require` it by the name defined in your library's `package.json`:
 
     ```javascript
     import DataUsageModule from 'react-native-android-datausage'
