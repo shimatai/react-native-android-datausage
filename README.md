@@ -157,8 +157,28 @@ There are many ways to do this, here's the way I do it:
     import { NativeModules} from 'react-native';
 
     if (NativeModules.DataUsageModule) {
+        // Get data usage of all installed apps in current device
         NativeModules.DataUsageModule.listDataUsageByApps((err, jsonArrayStr) => {
             if (!err) {
+		    var apps = JSON.parse(jsonArrayStr);
+		    console.log(apps);
+		    for (var i = 0; i < apps.length; i++) {
+			    var app = apps[i];
+			    console.log("App name: " + app.name + "\n" 
+					    + "Package name: " + app.packageName + "\n"
+					    + "Received bytes: " + app.rx + "bytes\n"
+					    + "Transmitted bytes: " + app.tx + "bytes\n"
+					    + "Received MB: " + app.rxMb + "\n"
+					    + "Transmitted MB: " + app.txMb);
+		    }
+            }
+        });
+
+        // Get data usage of specific list of installed apps in current device
+        // Example: get data usage for Facebook, YouTube and WhatsApp.
+        NativeModules.DataUsageModule.getDataUsageByApp(["com.facebook.katana", "com.google.android.youtube", "com.whatsapp"], 
+            (err, jsonArrayStr) => {
+                if (!err) {
 		    var apps = JSON.parse(jsonArrayStr);
 		    console.log(apps);
 		    for (var i = 0; i < apps.length; i++) {
