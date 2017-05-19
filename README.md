@@ -79,6 +79,8 @@ There are many ways to do this, here's the way I do it:
         import android.provider.Settings;
         import android.support.v4.app.ActivityCompat;
 
+        private static final int READ_PHONE_STATE_REQUEST = 37;
+
         @Override
         protected void onResume() {
                 super.onResume();
