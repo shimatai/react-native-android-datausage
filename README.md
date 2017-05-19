@@ -41,7 +41,32 @@ There are many ways to do this, here's the way I do it:
             }
         }
         ```
-    * You need to request some specific permissions to user, so add the following code to `android/app/src/main/java/**/MainActivity.java` after the method `getMainComponentName()`:
+    * You need to request some specific permissions to user, so add the following permissions to `AndroidManifest.xml` (don't forget to declare `xmlns:tools`):
+        ```xml
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                package="com.awesomeproject"
+                android:versionCode="1"
+                android:versionName="1.0">
+
+                <uses-permission android:name="android.permission.INTERNET" />
+                <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+                <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+                <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+                <uses-permission
+                        android:name="android.permission.PACKAGE_USAGE_STATS"
+                        tools:ignore="ProtectedPermissions"/>
+
+                <permission
+                        android:name="android.permission.PACKAGE_USAGE_STATS"
+                        android:protectionLevel="signature"/>
+
+                ...
+
+        </manifest>
+        ```
+
+    * For Android 6 or later, user needs to allow the requested permissions, so add the following code to `android/app/src/main/java/**/MainActivity.java` after the method `getMainComponentName()`:
         ```java
         package com.company.myapp;
 
