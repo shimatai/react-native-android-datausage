@@ -41,7 +41,7 @@ There are many ways to do this, here's the way I do it:
             }
         }
         ```
-    * You need to request some specific permissions to user, so add the following permissions to `AndroidManifest.xml` (don't forget to declare `xmlns:tools`):
+    * You need to request some specific permissions to user, so add the following permissions to `AndroidManifest.xml` (don't forget to declare the XML namespace `xmlns:tools`):
         ```xml
         <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
