@@ -42,7 +42,7 @@ There are many ways to do this, here's the way I do it:
         }
         ```
 
-3. Simply `import/require` it by the name defined in your library's `package.json`:
+3. Simply `import/require` this React Native Module `react-native-android-datausage`:
 
     ```javascript
     import DataUsageModule from 'react-native-android-datausage'
