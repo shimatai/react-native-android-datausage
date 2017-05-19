@@ -165,10 +165,10 @@ There are many ways to do this, here's the way I do it:
 			    var app = apps[i];
 			    console.log("App name: " + app.name + "\n" 
 					    + "Package name: " + app.packageName + "\n"
-					    + "Received bytes: " + rx + "bytes\n"
-					    + "Transmitted bytes: " + tx + "bytes\n"
-					    + "Received MB: " + rxMb + "\n"
-					    + "Transmitted MB: " + txMb);
+					    + "Received bytes: " + app.rx + "bytes\n"
+					    + "Transmitted bytes: " + app.tx + "bytes\n"
+					    + "Received MB: " + app.rxMb + "\n"
+					    + "Transmitted MB: " + app.txMb);
 		    }
             }
         });
