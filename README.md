@@ -156,7 +156,7 @@ There are many ways to do this, here's the way I do it:
     ```javascript
     import DataUsageModule from 'react-native-android-datausage'
     DataUsageModule.listDataUsageByApps((err, jsonArrayStr) => {
-	if (!err) {
+        if (!err) {
 		var apps = JSON.parse(jsonArrayStr);
 		console.log(apps);
 		for (var i = 0; i < apps.length; i++) {
@@ -168,7 +168,7 @@ There are many ways to do this, here's the way I do it:
 					+ "Received MB: " + rxMb + "\n"
 					+ "Transmitted MB: " + txMb);
 		}
-	}
-      });
+        }
+    });
     ```
 
