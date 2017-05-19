@@ -6,7 +6,9 @@ It uses [TrafficStats](https://developer.android.com/reference/android/net/Traff
 ## Installing it as a module in your project
 There are many ways to do this, here's the way I do it:
 
-1. Link the library:
+1. Do `npm install --save git+https://github.com/shimatai/react-native-android-datausage.git` in your React Native main project.
+
+2. Link the library:
     * Add the following to `android/settings.gradle`:
         ```
         include ':react-native-android-datausage'
@@ -39,8 +41,6 @@ There are many ways to do this, here's the way I do it:
             }
         }
         ```
-
-2. Do `npm install --save git+https://github.com/shimatai/react-native-android-datausage.git` in your React Native main project.
 
 3. Simply `import/require` it by the name defined in your library's `package.json`:
 
