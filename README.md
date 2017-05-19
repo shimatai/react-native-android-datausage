@@ -86,6 +86,7 @@ There are many ways to do this, here's the way I do it:
         }
 
         private void requestPermissions() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (!hasPermissionToReadNetworkHistory()) {
                         return;
                 }
@@ -94,6 +95,7 @@ There are many ways to do this, here's the way I do it:
                         requestPhoneStateStats();
                         return;
                 }
+            }
         }
 
         private boolean hasPermissionToReadNetworkHistory() {
