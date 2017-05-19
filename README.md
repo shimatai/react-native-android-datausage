@@ -154,7 +154,12 @@ There are many ways to do this, here's the way I do it:
 3. Simply `import/require` this React Native Module `react-native-android-datausage`:
 
     ```javascript
-    import DataUsageModule from 'react-native-android-datausage'
+    import DataUsageModule from 'react-native-android-datausage';
+
+    // or
+
+    var DataUsageModule = require('react-native-android-datausage');
+
     DataUsageModule.listDataUsageByApps((err, jsonArrayStr) => {
         if (!err) {
 		var apps = JSON.parse(jsonArrayStr);
