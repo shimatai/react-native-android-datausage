@@ -1,0 +1,103 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/bin/node',
+1 verbose cli   '/usr/bin/npm',
+1 verbose cli   'install',
+1 verbose cli   '--save',
+1 verbose cli   'git+https://github.com/shimatai/react-native-android-datausage.git' ]
+2 info using npm@3.10.10
+3 info using node@v6.10.2
+4 silly loadCurrentTree Starting
+5 silly install loadCurrentTree
+6 silly install readLocalPackageData
+7 silly fetchPackageMetaData git+https://github.com/shimatai/react-native-android-datausage.git
+8 silly fetchOtherPackageData git+https://github.com/shimatai/react-native-android-datausage.git
+9 silly cache add args [ 'git+https://github.com/shimatai/react-native-android-datausage.git',
+9 silly cache add   null ]
+10 verbose cache add spec git+https://github.com/shimatai/react-native-android-datausage.git
+11 silly cache add parsed spec Result {
+11 silly cache add   raw: 'git+https://github.com/shimatai/react-native-android-datausage.git',
+11 silly cache add   scope: null,
+11 silly cache add   escapedName: null,
+11 silly cache add   name: null,
+11 silly cache add   rawSpec: 'git+https://github.com/shimatai/react-native-android-datausage.git',
+11 silly cache add   spec: 'git+https://github.com/shimatai/react-native-android-datausage.git',
+11 silly cache add   type: 'hosted',
+11 silly cache add   hosted:
+11 silly cache add    { type: 'github',
+11 silly cache add      ssh: 'git@github.com:shimatai/react-native-android-datausage.git',
+11 silly cache add      sshUrl: 'git+ssh://git@github.com/shimatai/react-native-android-datausage.git',
+11 silly cache add      httpsUrl: 'git+https://github.com/shimatai/react-native-android-datausage.git',
+11 silly cache add      gitUrl: 'git://github.com/shimatai/react-native-android-datausage.git',
+11 silly cache add      shortcut: 'github:shimatai/react-native-android-datausage',
+11 silly cache add      directUrl: 'https://raw.githubusercontent.com/shimatai/react-native-android-datausage/master/package.json' } }
+12 verbose addRemoteGit caching git+https://github.com/shimatai/react-native-android-datausage.git
+13 verbose addRemoteGit git+https://github.com/shimatai/react-native-android-datausage.git is a repository hosted by github
+14 silly tryClone cloning git+https://github.com/shimatai/react-native-android-datausage.git via git+https://github.com/shimatai/react-native-android-datausage.git
+15 verbose tryClone git-https-github-com-shimatai-react-native-android-datausage-git-1b43d671 not in flight; caching
+16 verbose correctMkdir /home/shimatai/.npm/_git-remotes correctMkdir not in flight; initializing
+17 verbose makeDirectory /home/shimatai/.npm/_git-remotes creation not in flight; initializing
+18 silly makeDirectory /home/shimatai/.npm/_git-remotes uid: 1001 gid: 1001
+19 info git [ 'clone',
+19 info git   '--template=/home/shimatai/.npm/_git-remotes/_templates',
+19 info git   '--mirror',
+19 info git   'https://github.com/shimatai/react-native-android-datausage.git',
+19 info git   '/home/shimatai/.npm/_git-remotes/git-https-github-com-shimatai-react-native-android-datausage-git-1b43d671' ]
+20 verbose mirrorRemote git+https://github.com/shimatai/react-native-android-datausage.git git clone https://github.com/shimatai/react-native-android-datausage.git Cloning into bare repository '/home/shimatai/.npm/_git-remotes/git-https-github-com-shimatai-react-native-android-datausage-git-1b43d671'...
+21 verbose correctMkdir /home/shimatai/.npm/_git-remotes correctMkdir not in flight; initializing
+22 verbose setPermissions git+https://github.com/shimatai/react-native-android-datausage.git set permissions on /home/shimatai/.npm/_git-remotes/git-https-github-com-shimatai-react-native-android-datausage-git-1b43d671
+23 verbose resolveHead git+https://github.com/shimatai/react-native-android-datausage.git original treeish: master
+24 info git [ 'rev-list', '-n1', 'master' ]
+25 error git rev-list -n1 master: fatal: ambiguous argument 'master': unknown revision or path not in the working tree.
+25 error git rev-list -n1 master: Use '--' to separate paths from revisions, like this:
+25 error git rev-list -n1 master: 'git <command> [<revision>...] -- [<file>...]'
+26 silly fetchPackageMetaData Error: Command failed: git rev-list -n1 master
+26 silly fetchPackageMetaData fatal: ambiguous argument 'master': unknown revision or path not in the working tree.
+26 silly fetchPackageMetaData Use '--' to separate paths from revisions, like this:
+26 silly fetchPackageMetaData 'git <command> [<revision>...] -- [<file>...]'
+26 silly fetchPackageMetaData
+26 silly fetchPackageMetaData     at ChildProcess.exithandler (child_process.js:204:12)
+26 silly fetchPackageMetaData     at emitTwo (events.js:106:13)
+26 silly fetchPackageMetaData     at ChildProcess.emit (events.js:191:7)
+26 silly fetchPackageMetaData     at maybeClose (internal/child_process.js:886:16)
+26 silly fetchPackageMetaData     at Process.ChildProcess._handle.onexit (internal/child_process.js:226:5)
+26 silly fetchPackageMetaData  error for git+https://github.com/shimatai/react-native-android-datausage.git { Error: Command failed: git rev-list -n1 master
+26 silly fetchPackageMetaData fatal: ambiguous argument 'master': unknown revision or path not in the working tree.
+26 silly fetchPackageMetaData Use '--' to separate paths from revisions, like this:
+26 silly fetchPackageMetaData 'git <command> [<revision>...] -- [<file>...]'
+26 silly fetchPackageMetaData
+26 silly fetchPackageMetaData     at ChildProcess.exithandler (child_process.js:204:12)
+26 silly fetchPackageMetaData     at emitTwo (events.js:106:13)
+26 silly fetchPackageMetaData     at ChildProcess.emit (events.js:191:7)
+26 silly fetchPackageMetaData     at maybeClose (internal/child_process.js:886:16)
+26 silly fetchPackageMetaData     at Process.ChildProcess._handle.onexit (internal/child_process.js:226:5)
+26 silly fetchPackageMetaData   killed: false,
+26 silly fetchPackageMetaData   code: 128,
+26 silly fetchPackageMetaData   signal: null,
+26 silly fetchPackageMetaData   cmd: 'git rev-list -n1 master' }
+27 silly rollbackFailedOptional Starting
+28 silly rollbackFailedOptional Finishing
+29 silly runTopLevelLifecycles Finishing
+30 silly install printInstalled
+31 verbose stack Error: Command failed: git rev-list -n1 master
+31 verbose stack fatal: ambiguous argument 'master': unknown revision or path not in the working tree.
+31 verbose stack Use '--' to separate paths from revisions, like this:
+31 verbose stack 'git <command> [<revision>...] -- [<file>...]'
+31 verbose stack
+31 verbose stack     at ChildProcess.exithandler (child_process.js:204:12)
+31 verbose stack     at emitTwo (events.js:106:13)
+31 verbose stack     at ChildProcess.emit (events.js:191:7)
+31 verbose stack     at maybeClose (internal/child_process.js:886:16)
+31 verbose stack     at Process.ChildProcess._handle.onexit (internal/child_process.js:226:5)
+32 verbose cwd /home/shimatai/react-native-android-datausage
+33 error Linux 3.10.0-514.16.1.el7.x86_64
+34 error argv "/usr/bin/node" "/usr/bin/npm" "install" "--save" "git+https://github.com/shimatai/react-native-android-datausage.git"
+35 error node v6.10.2
+36 error npm  v3.10.10
+37 error code 128
+38 error Command failed: git rev-list -n1 master
+38 error fatal: ambiguous argument 'master': unknown revision or path not in the working tree.
+38 error Use '--' to separate paths from revisions, like this:
+38 error 'git <command> [<revision>...] -- [<file>...]'
+39 error If you need help, you may report this error at:
+39 error     <https://github.com/npm/npm/issues>
+40 verbose exit [ 1, true ]
