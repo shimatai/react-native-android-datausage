@@ -1,17 +1,17 @@
 {
   "name": "react-native-android-datausage",
   "version": "1.0.0",
-  "author": "Oi",
+  "author": "Wagner Shimatai",
   "private": false,
   "license": "Unlicense",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MrToph/react-native-android-library-boilerplate.git"
+    "url": "https://github.com/shimatai/react-native-android-datausage.git"
   },
   "bugs": {
-    "url": "https://github.com/MrToph/react-native-android-library-boilerplate/issues"
+    "url": "https://github.com/shimatai/react-native-android-datausage/issues"
   },
-  "homepage": "https://github.com/MrToph/react-native-android-library-boilerplate",
+  "homepage": "https://github.com/shimatai/react-native-android-datausage",
   "keywords": [
     "react-native",
     "android",
