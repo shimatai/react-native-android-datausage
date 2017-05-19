@@ -30,6 +30,8 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 
+import static android.content.pm.PackageManager.GET_META_DATA;
+
 public class DataUsageModule extends ReactContextBaseJavaModule {
 
     private static final String TAG = "DataUsageModule";
@@ -43,6 +45,53 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
         return TAG;
     }
 
+    public void getDataUsageByApp(final String[] packageNames, final Callback callback) {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                final PackageManager packageManager = getReactApplicationContext().getPackageManager();
+                JSONArray apps = new JSONArray();
+                try {
+                    if (packageNames != null && packageNames.length > 0) {
+                        for (String packageName : packageNames) {
+                            final PackageInfo packageInfo = packageManager.getPackageInfo(packageName, GET_META_DATA);
+                            int uid = packageInfo.applicationInfo.uid;
+
+                            ApplicationInfo appInfo = null;
+                            try {
+                                appInfo = packageManager.getApplicationInfo(packageName, 0);
+                            } catch (PackageManager.NameNotFoundException e) {
+                                Log.e(TAG, "Error getting application info: " + e.getMessage(), e);
+                            }
+
+                            String name = (String) packageManager.getApplicationLabel(appInfo);
+                            Drawable icon = packageManager.getApplicationIcon(appInfo);
+
+                            Bitmap bitmap = drawableToBitmap(icon);
+                            String encodedImage = encodeBitmapToBase64(bitmap);
+
+                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                                // < Android 6.0
+                                Log.i(TAG, "##### Android 5- App: " + name + "     packageName: " + packageName);
+                                JSONObject appStats = getTrafficStats(uid, name, packageName, encodedImage);
+                                if (appStats != null) apps.put(appStats);
+                            } else {
+                                // Android 6+
+                                Log.i(TAG, "##### Android 6+ App: " + name + "     packageName: " + packageName);
+                                JSONObject appStats = getNetworkManagerStats(uid, name, packageName, encodedImage);
+                                if (appStats != null) apps.put(appStats);
+                            }
+                        }
+                    }
+                } catch (PackageManager.NameNotFoundException e) {
+                    Log.e(TAG, "Error getting app info: " + e.getMessage(), e);
+                }
+
+                callback.invoke(null, apps.toString());
+            }
+        });
+    }
+
     @ReactMethod
     public void listDataUsageByApps(final Callback callback) {
         AsyncTask.execute(new Runnable() {
@@ -50,7 +99,6 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
             public void run() {
                 Log.i(TAG, "##### Listar todos os aplicativos por uso de dados...");
                 Context context = getReactApplicationContext();
-                ContentResolver cr = context.getContentResolver();
 
                 final PackageManager packageManager = getReactApplicationContext().getPackageManager();
                 //List<ApplicationInfo> packages = packageManager.getInstalledApplications(0);

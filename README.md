@@ -1,4 +1,4 @@
-## React Native Module for Android 
+## React Native Module for Android - Data Usage per App 
 This React Native module shows data usage per application in Android (required version 4.4 or later).
 
 It uses [TrafficStats](https://developer.android.com/reference/android/net/TrafficStats.html) or [NetworkStatsManager](https://developer.android.com/reference/android/app/usage/NetworkStatsManager.html) (requires Android 6.0 or later).
