@@ -151,29 +151,27 @@ There are many ways to do this, here's the way I do it:
         }
         ```
 
-3. Simply `import/require` this React Native Module `react-native-android-datausage`:
+3. Simply add `NativeModules` to import this React Native module:
 
     ```javascript
-    import DataUsageModule from 'react-native-android-datausage';
+    import { NativeModules} from 'react-native';
 
-    // or
-
-    var DataUsageModule = require('react-native-android-datausage');
-
-    DataUsageModule.listDataUsageByApps((err, jsonArrayStr) => {
-        if (!err) {
-		var apps = JSON.parse(jsonArrayStr);
-		console.log(apps);
-		for (var i = 0; i < apps.length; i++) {
-			var app = apps[i];
-			console.log("App name: " + app.name + "\n" 
-					+ "Package name: " + app.packageName + "\n"
-					+ "Received bytes: " + rx + "bytes\n"
-					+ "Transmitted bytes: " + tx + "bytes\n"
-					+ "Received MB: " + rxMb + "\n"
-					+ "Transmitted MB: " + txMb);
-		}
-        }
-    });
+    if (NativeModules.DataUsageModule) {
+        NativeModules.DataUsageModule.listDataUsageByApps((err, jsonArrayStr) => {
+            if (!err) {
+		    var apps = JSON.parse(jsonArrayStr);
+		    console.log(apps);
+		    for (var i = 0; i < apps.length; i++) {
+			    var app = apps[i];
+			    console.log("App name: " + app.name + "\n" 
+					    + "Package name: " + app.packageName + "\n"
+					    + "Received bytes: " + rx + "bytes\n"
+					    + "Transmitted bytes: " + tx + "bytes\n"
+					    + "Received MB: " + rxMb + "\n"
+					    + "Transmitted MB: " + txMb);
+		    }
+            }
+        });
+    }
     ```
 
