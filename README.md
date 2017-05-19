@@ -45,11 +45,10 @@ There are many ways to do this, here's the way I do it:
         ```xml
         <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
-                package="com.awesomeproject"
+                package="com.company.myapp"
                 android:versionCode="1"
                 android:versionName="1.0">
 
-                <uses-permission android:name="android.permission.INTERNET" />
                 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
                 <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
                 <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
