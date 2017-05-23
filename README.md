@@ -83,6 +83,8 @@ There are many ways to do this, here's the way I do it:
 
         private static final int READ_PHONE_STATE_REQUEST = 37;
 
+        ...
+
         @Override
         protected void onResume() {
                 super.onResume();
@@ -156,7 +158,7 @@ There are many ways to do this, here's the way I do it:
 3. Simply add `NativeModules` to import this React Native module:
 
     ```javascript
-    import { NativeModules} from 'react-native';
+    import { NativeModules } from 'react-native';
 
     if (NativeModules.DataUsageModule) {
         // Get data usage of all installed apps in current device
