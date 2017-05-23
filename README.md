@@ -162,7 +162,7 @@ There are many ways to do this, here's the way I do it:
 
     if (NativeModules.DataUsageModule) {
         // Get data usage of all installed apps in current device
-        // Parameters "startDate" and "endDate" are optional. Declare empty object {} for no date filter.
+        // Parameters "startDate" and "endDate" are optional (works only with Android 6.0 or later). Declare empty object {} for no date filter.
         NativeModules.DataUsageModule.listDataUsageByApps({
             "startDate": new Date(2017, 4, 22, 0, 0, 0, 0).getTime(), // 1495422000000 = Mon May 22 2017 00:00:00
             "endDate": new Date().getTime()
@@ -185,7 +185,7 @@ There are many ways to do this, here's the way I do it:
 
         // Get data usage of specific list of installed apps in current device
         // Example: get data usage for Facebook, YouTube and WhatsApp.
-        // Parameters "startDate" and "endDate" are optional
+        // Parameters "startDate" and "endDate" are optional (works only with Android 6.0 or later)
         NativeModules.DataUsageModule.getDataUsageByApp({
                 "packages": ["com.facebook.katana", "com.google.android.youtube", "com.whatsapp"],
                 "startDate": new Date(2017, 4, 22, 0, 0, 0, 0).getTime(), // 1495422000000 = Mon May 22 2017 00:00:00
