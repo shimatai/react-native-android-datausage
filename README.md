@@ -161,7 +161,6 @@ There are many ways to do this, here's the way I do it:
     if (NativeModules.DataUsageModule) {
         // Get data usage of all installed apps in current device
         NativeModules.DataUsageModule.listDataUsageByApps({
-            "packages": ["com.facebook.katana", "com.google.android.youtube", "com.whatsapp"],
             "startDate": 0,
             "endDate": new Date().getTime()
         },
