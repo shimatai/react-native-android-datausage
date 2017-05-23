@@ -9,6 +9,8 @@ import android.os.Build;
 import android.os.RemoteException;
 import android.telephony.TelephonyManager;
 
+import java.util.Date;
+
 @TargetApi(Build.VERSION_CODES.M)
 public class NetworkStatsHelper {
 
@@ -25,12 +27,16 @@ public class NetworkStatsHelper {
     }
 
     public long getAllRxBytesMobile(Context context) {
+        return getAllRxBytesMobile(context, null, null);
+    }
+
+    public long getAllRxBytesMobile(Context context, Date startDate, Date endDate) {
         NetworkStats.Bucket bucket;
         try {
             bucket = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE,
-                    getSubscriberId(context, ConnectivityManager.TYPE_MOBILE),
-                    0,
-                    System.currentTimeMillis());
+                                getSubscriberId(context, ConnectivityManager.TYPE_MOBILE),
+                                startDate != null ? startDate.getTime() : 0,
+                                endDate != null ? endDate.getTime() : System.currentTimeMillis());
         } catch (RemoteException e) {
             return -1;
         }
@@ -38,12 +44,16 @@ public class NetworkStatsHelper {
     }
 
     public long getAllTxBytesMobile(Context context) {
+        return getAllTxBytesMobile(context, null, null);
+    }
+
+    public long getAllTxBytesMobile(Context context, Date startDate, Date endDate) {
         NetworkStats.Bucket bucket;
         try {
             bucket = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE,
-                    getSubscriberId(context, ConnectivityManager.TYPE_MOBILE),
-                    0,
-                    System.currentTimeMillis());
+                                    getSubscriberId(context, ConnectivityManager.TYPE_MOBILE),
+                                    startDate != null ? startDate.getTime() : 0,
+                                    endDate != null ? endDate.getTime() : System.currentTimeMillis());
         } catch (RemoteException e) {
             return -1;
         }
@@ -51,12 +61,16 @@ public class NetworkStatsHelper {
     }
 
     public long getAllRxBytesWifi() {
+        return getAllRxBytesWifi(null, null);
+    }
+
+    public long getAllRxBytesWifi(Date startDate, Date endDate) {
         NetworkStats.Bucket bucket;
         try {
             bucket = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_WIFI,
-                    "",
-                    0,
-                    System.currentTimeMillis());
+                                "",
+                                startDate != null ? startDate.getTime() : 0,
+                                endDate != null ? endDate.getTime() : System.currentTimeMillis());
         } catch (RemoteException e) {
             return -1;
         }
@@ -64,12 +78,16 @@ public class NetworkStatsHelper {
     }
 
     public long getAllTxBytesWifi() {
+        return getAllTxBytesWifi(null, null);
+    }
+
+    public long getAllTxBytesWifi(Date startDate, Date endDate) {
         NetworkStats.Bucket bucket;
         try {
             bucket = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_WIFI,
                     "",
-                    0,
-                    System.currentTimeMillis());
+                    startDate != null ? startDate.getTime() : 0,
+                    endDate != null ? endDate.getTime() : System.currentTimeMillis());
         } catch (RemoteException e) {
             return -1;
         }
@@ -77,14 +95,18 @@ public class NetworkStatsHelper {
     }
 
     public long getPackageRxBytesMobile(Context context) {
+        return getPackageRxBytesMobile(context, null, null);
+    }
+
+    public long getPackageRxBytesMobile(Context context, Date startDate, Date endDate) {
         NetworkStats networkStats = null;
         try {
             networkStats = networkStatsManager.queryDetailsForUid(
-                    ConnectivityManager.TYPE_MOBILE,
-                    getSubscriberId(context, ConnectivityManager.TYPE_MOBILE),
-                    0,
-                    System.currentTimeMillis(),
-                    packageUid);
+                                    ConnectivityManager.TYPE_MOBILE,
+                                    getSubscriberId(context, ConnectivityManager.TYPE_MOBILE),
+                                    startDate != null ? startDate.getTime() : 0,
+                                    endDate != null ? endDate.getTime() : System.currentTimeMillis(),
+                                    packageUid);
         } catch (RemoteException e) {
             return -1;
         }
@@ -97,14 +119,18 @@ public class NetworkStatsHelper {
     }
 
     public long getPackageTxBytesMobile(Context context) {
+        return getPackageTxBytesMobile(context, null, null);
+    }
+
+    public long getPackageTxBytesMobile(Context context, Date startDate, Date endDate) {
         NetworkStats networkStats = null;
         try {
             networkStats = networkStatsManager.queryDetailsForUid(
-                    ConnectivityManager.TYPE_MOBILE,
-                    getSubscriberId(context, ConnectivityManager.TYPE_MOBILE),
-                    0,
-                    System.currentTimeMillis(),
-                    packageUid);
+                                ConnectivityManager.TYPE_MOBILE,
+                                getSubscriberId(context, ConnectivityManager.TYPE_MOBILE),
+                                startDate != null ? startDate.getTime() : 0,
+                                endDate != null ? endDate.getTime() : System.currentTimeMillis(),
+                                packageUid);
         } catch (RemoteException e) {
             return -1;
         }
@@ -116,13 +142,17 @@ public class NetworkStatsHelper {
     }
 
     public long getPackageRxBytesWifi() {
+        return getPackageRxBytesWifi(null, null);
+    }
+
+    public long getPackageRxBytesWifi(Date startDate, Date endDate) {
         NetworkStats networkStats = null;
         try {
             networkStats = networkStatsManager.queryDetailsForUid(
-                    ConnectivityManager.TYPE_WIFI,
-                    "",
-                    0,
-                    System.currentTimeMillis(),
+                                ConnectivityManager.TYPE_WIFI,
+                                "",
+                                startDate != null ? startDate.getTime() : 0,
+                                endDate != null ? endDate.getTime() : System.currentTimeMillis(),
                     packageUid);
         } catch (RemoteException e) {
             return -1;
@@ -135,14 +165,18 @@ public class NetworkStatsHelper {
     }
 
     public long getPackageTxBytesWifi() {
+        return getPackageTxBytesWifi(null, null);
+    }
+
+    public long getPackageTxBytesWifi(Date startDate, Date endDate) {
         NetworkStats networkStats = null;
         try {
             networkStats = networkStatsManager.queryDetailsForUid(
-                    ConnectivityManager.TYPE_WIFI,
-                    "",
-                    0,
-                    System.currentTimeMillis(),
-                    packageUid);
+                                    ConnectivityManager.TYPE_WIFI,
+                                    "",
+                                    startDate != null ? startDate.getTime() : 0,
+                                    endDate != null ? endDate.getTime() : System.currentTimeMillis(),
+                                    packageUid);
         } catch (RemoteException e) {
             return -1;
         }
@@ -158,6 +192,7 @@ public class NetworkStatsHelper {
             TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
             return tm.getSubscriberId();
         }
+
         return "";
     }
 }
