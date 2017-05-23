@@ -22,6 +22,8 @@ import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,15 +47,18 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
         return TAG;
     }
 
-    public void getDataUsageByApp(final String[] packageNames, final Callback callback) {
+    public void getDataUsageByApp(final ReadableMap map, final Callback callback) {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
                 final PackageManager packageManager = getReactApplicationContext().getPackageManager();
                 JSONArray apps = new JSONArray();
                 try {
-                    if (packageNames != null && packageNames.length > 0) {
-                        for (String packageName : packageNames) {
+                    ReadableArray packageNames = map.hasKey("packages") ? map.getArray("packages") : null;
+
+                    if (packageNames != null && packageNames.size() > 0) {
+                        for (int i = 0; i < packageNames.size(); i++) {
+                            String packageName = packageNames.getString(i);
                             final PackageInfo packageInfo = packageManager.getPackageInfo(packageName, GET_META_DATA);
                             int uid = packageInfo.applicationInfo.uid;
 
