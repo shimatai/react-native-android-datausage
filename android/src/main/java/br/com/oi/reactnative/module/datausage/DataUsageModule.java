@@ -172,7 +172,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
         double gsmBytesRx = (double) networkStatsHelper.getPackageRxBytesMobile(getReactApplicationContext()) + networkStatsHelper.getPackageRxBytesMobile(getReactApplicationContext(), startDate, endDate);
         double gsmBytesTx = (double) networkStatsHelper.getPackageTxBytesMobile(getReactApplicationContext()) + networkStatsHelper.getPackageRxBytesMobile(getReactApplicationContext(), startDate, endDate);
         double total = gsmBytesRx + gsmBytesTx;
-        Log.i(TAG, "getNetworkManagerStats - tx: " + gsmBytesTx + " | rx: " + gsmBytesRx + " | total: " + total);
+        Log.i(TAG, "getNetworkManagerStats - " + packageName + "- tx: " + gsmBytesTx + " | rx: " + gsmBytesRx + " | total: " + total);
 
         try {
             if (total > 0D) {
@@ -200,6 +200,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
 
         try {
             if (total > 0) {
+                Log.i(TAG, "getTrafficStats - " + packageName + "- tx: " + tx + " | rx: " + rx + " | total: " + total);
                 return new JSONObject().put("name", name)
                                         .put("packageName", packageName)
                                         .put("rx", rx)
