@@ -162,7 +162,7 @@ There are many ways to do this, here's the way I do it:
         // Get data usage of all installed apps in current device
         // Parameters "startDate" and "endDate" are optional. Declare empty object {} for no date filter.
         NativeModules.DataUsageModule.listDataUsageByApps({
-            "startDate": new Date(2017, 4, 22, 0, 0, 0, 0).getTime(), // 1495422000000 = Mon May 22 2017 00:00:00 GMT-0300 (-03)
+            "startDate": new Date(2017, 4, 22, 0, 0, 0, 0).getTime(), // 1495422000000 = Mon May 22 2017 00:00:00
             "endDate": new Date().getTime()
         },
         (err, jsonArrayStr) => {
@@ -186,7 +186,7 @@ There are many ways to do this, here's the way I do it:
         // Parameters "startDate" and "endDate" are optional
         NativeModules.DataUsageModule.getDataUsageByApp({
                 "packages": ["com.facebook.katana", "com.google.android.youtube", "com.whatsapp"],
-                "startDate": new Date(2017, 4, 22, 0, 0, 0, 0).getTime(), // 1495422000000 = Mon May 22 2017 00:00:00 GMT-0300 (-03)
+                "startDate": new Date(2017, 4, 22, 0, 0, 0, 0).getTime(), // 1495422000000 = Mon May 22 2017 00:00:00
                 "endDate": new Date().getTime()
             }, 
             (err, jsonArrayStr) => {
