@@ -160,7 +160,12 @@ There are many ways to do this, here's the way I do it:
 
     if (NativeModules.DataUsageModule) {
         // Get data usage of all installed apps in current device
-        NativeModules.DataUsageModule.listDataUsageByApps((err, jsonArrayStr) => {
+        NativeModules.DataUsageModule.listDataUsageByApps({
+            "packages": ["com.facebook.katana", "com.google.android.youtube", "com.whatsapp"],
+            "startDate": 0,
+            "endDate": new Date().getTime()
+        },
+        (err, jsonArrayStr) => {
             if (!err) {
 		    var apps = JSON.parse(jsonArrayStr);
 		    console.log(apps);
@@ -178,7 +183,11 @@ There are many ways to do this, here's the way I do it:
 
         // Get data usage of specific list of installed apps in current device
         // Example: get data usage for Facebook, YouTube and WhatsApp.
-        NativeModules.DataUsageModule.getDataUsageByApp(["com.facebook.katana", "com.google.android.youtube", "com.whatsapp"], 
+        NativeModules.DataUsageModule.getDataUsageByApp({
+                "packages": ["com.facebook.katana", "com.google.android.youtube", "com.whatsapp"],
+                "startDate": 0,
+                "endDate": new Date().getTime()
+            }, 
             (err, jsonArrayStr) => {
                 if (!err) {
 		    var apps = JSON.parse(jsonArrayStr);

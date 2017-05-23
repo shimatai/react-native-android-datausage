@@ -30,6 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Date;
 import java.util.List;
 
 import static android.content.pm.PackageManager.GET_META_DATA;
@@ -47,6 +48,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
         return TAG;
     }
 
+    @ReactMethod
     public void getDataUsageByApp(final ReadableMap map, final Callback callback) {
         AsyncTask.execute(new Runnable() {
             @Override
@@ -55,6 +57,8 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
                 JSONArray apps = new JSONArray();
                 try {
                     ReadableArray packageNames = map.hasKey("packages") ? map.getArray("packages") : null;
+                    Date startDate = map.hasKey("startDate") ? new Date(Double.valueOf(map.getDouble("startDate")).longValue()) : null;
+                    Date endDate = map.hasKey("endDate") ? new Date(Double.valueOf(map.getDouble("endDate")).longValue()) : null;
 
                     if (packageNames != null && packageNames.size() > 0) {
                         for (int i = 0; i < packageNames.size(); i++) {
@@ -83,7 +87,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
                             } else {
                                 // Android 6+
                                 Log.i(TAG, "##### Android 6+ App: " + name + "     packageName: " + packageName);
-                                JSONObject appStats = getNetworkManagerStats(uid, name, packageName, encodedImage);
+                                JSONObject appStats = getNetworkManagerStats(uid, name, packageName, encodedImage, startDate, endDate);
                                 if (appStats != null) apps.put(appStats);
                             }
                         }
@@ -98,7 +102,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void listDataUsageByApps(final Callback callback) {
+    public void listDataUsageByApps(final ReadableMap map, final Callback callback) {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
@@ -108,6 +112,9 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
                 final PackageManager packageManager = getReactApplicationContext().getPackageManager();
                 //List<ApplicationInfo> packages = packageManager.getInstalledApplications(0);
                 JSONArray apps = new JSONArray();
+                Date startDate = map.hasKey("startDate") ? new Date(Double.valueOf(map.getDouble("startDate")).longValue()) : null;
+                Date endDate = map.hasKey("endDate") ? new Date(Double.valueOf(map.getDouble("endDate")).longValue()) : null;
+
 
                 final List<PackageInfo> packageInfoList = packageManager.getInstalledPackages(PackageManager.GET_PERMISSIONS);
                 for (PackageInfo packageInfo : packageInfoList) {
@@ -140,7 +147,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
                             } else {
                                 // Android 6+
                                 Log.i(TAG, "##### Android 6+ App: " + name + "     packageName: " + packageName);
-                                JSONObject appStats = getNetworkManagerStats(uid, name, packageName, encodedImage);
+                                JSONObject appStats = getNetworkManagerStats(uid, name, packageName, encodedImage, startDate, endDate);
                                 if (appStats != null) apps.put(appStats);
                             }
 
@@ -154,7 +161,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
         });
     }
 
-    private JSONObject getNetworkManagerStats(int uid, String name, String packageName, String encodedImage) {
+    private JSONObject getNetworkManagerStats(int uid, String name, String packageName, String encodedImage, Date startDate, Date endDate) {
         //Log.i(TAG, "##### Step getNetworkManagerStats(" + uid + ", " + name + ", ...)");
         NetworkStatsManager networkStatsManager = (NetworkStatsManager) getReactApplicationContext().getSystemService(Context.NETWORK_STATS_SERVICE);
         NetworkStatsHelper networkStatsHelper = new NetworkStatsHelper(networkStatsManager, uid);
@@ -162,8 +169,8 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
         //long wifiBytesRx = networkStatsHelper.getAllRxBytesMobile(getReactApplicationContext()) + networkStatsHelper.getAllRxBytesWifi();
         //long wifiBytesTx = networkStatsHelper.getAllRxBytesMobile(getReactApplicationContext()) + networkStatsHelper.getAllRxBytesWifi();
 
-        double gsmBytesRx = (double) networkStatsHelper.getPackageRxBytesMobile(getReactApplicationContext()) + networkStatsHelper.getPackageRxBytesMobile(getReactApplicationContext());
-        double gsmBytesTx = (double) networkStatsHelper.getPackageTxBytesMobile(getReactApplicationContext()) + networkStatsHelper.getPackageRxBytesMobile(getReactApplicationContext());
+        double gsmBytesRx = (double) networkStatsHelper.getPackageRxBytesMobile(getReactApplicationContext()) + networkStatsHelper.getPackageRxBytesMobile(getReactApplicationContext(), startDate, endDate);
+        double gsmBytesTx = (double) networkStatsHelper.getPackageTxBytesMobile(getReactApplicationContext()) + networkStatsHelper.getPackageRxBytesMobile(getReactApplicationContext(), startDate, endDate);
         double total = gsmBytesRx + gsmBytesTx;
         Log.i(TAG, "getNetworkManagerStats - tx: " + gsmBytesTx + " | rx: " + gsmBytesRx + " | total: " + total);
 
