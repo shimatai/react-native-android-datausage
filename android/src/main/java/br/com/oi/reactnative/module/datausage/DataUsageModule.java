@@ -188,7 +188,6 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
                 Date startDate = map.hasKey("startDate") ? new Date(Double.valueOf(map.getDouble("startDate")).longValue()) : null;
                 Date endDate = map.hasKey("endDate") ? new Date(Double.valueOf(map.getDouble("endDate")).longValue()) : null;
 
-
                 final List<PackageInfo> packageInfoList = packageManager.getInstalledPackages(PackageManager.GET_PERMISSIONS);
                 for (PackageInfo packageInfo : packageInfoList) {
                     if (packageInfo.requestedPermissions == null)
@@ -224,7 +223,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
                                 Log.e(TAG, "Error getting application info: " + e.getMessage(), e);
                             }
 
-                            break;
+                            //break;
                         }
                     }
                 }
