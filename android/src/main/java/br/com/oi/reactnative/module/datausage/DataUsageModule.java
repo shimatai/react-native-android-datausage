@@ -1,7 +1,6 @@
 package br.com.oi.reactnative.module.datausage;
 
 import android.app.usage.NetworkStatsManager;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -17,7 +16,6 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 
-import br.com.oi.reactnative.module.datausage.helper.NetworkStatsHelper;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -30,8 +28,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
+import br.com.oi.reactnative.module.datausage.helper.NetworkStatsHelper;
 
 import static android.content.pm.PackageManager.GET_META_DATA;
 
@@ -193,38 +194,36 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
                     if (packageInfo.requestedPermissions == null)
                         continue;
 
-                    for (String permission : packageInfo.requestedPermissions) {
-                        if (TextUtils.equals(permission, android.Manifest.permission.INTERNET)) {
-                            int uid = packageInfo.applicationInfo.uid;
-                            String packageName = packageInfo.packageName;
+                    List<String> permissions = Arrays.asList(packageInfo.requestedPermissions);
+                    if (permissions.contains(android.Manifest.permission.INTERNET)) {
+                        int uid = packageInfo.applicationInfo.uid;
+                        String packageName = packageInfo.packageName;
 
-                            ApplicationInfo appInfo = null;
-                            try {
-                                appInfo = packageManager.getApplicationInfo(packageName, 0);
+                        ApplicationInfo appInfo = null;
+                        try {
+                            appInfo = packageManager.getApplicationInfo(packageName, 0);
 
-                                String name = (String) packageManager.getApplicationLabel(appInfo);
-                                Drawable icon = packageManager.getApplicationIcon(appInfo);
+                            String name = (String) packageManager.getApplicationLabel(appInfo);
+                            Drawable icon = packageManager.getApplicationIcon(appInfo);
 
-                                Bitmap bitmap = drawableToBitmap(icon);
-                                String encodedImage = encodeBitmapToBase64(bitmap);
+                            Bitmap bitmap = drawableToBitmap(icon);
+                            String encodedImage = encodeBitmapToBase64(bitmap);
 
-                                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                                    // < Android 6.0
-                                    Log.i(TAG, "##### Android 5- App: " + name + "     packageName: " + packageName);
-                                    JSONObject appStats = getTrafficStats(uid, name, packageName, encodedImage);
-                                    if (appStats != null) apps.put(appStats);
-                                } else {
-                                    // Android 6+
-                                    Log.i(TAG, "##### Android 6+ App: " + name + "     packageName: " + packageName);
-                                    JSONObject appStats = getNetworkManagerStats(uid, name, packageName, encodedImage, startDate, endDate);
-                                    if (appStats != null) apps.put(appStats);
-                                }
-                            } catch (PackageManager.NameNotFoundException e) {
-                                Log.e(TAG, "Error getting application info: " + e.getMessage(), e);
+                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                                // < Android 6.0
+                                Log.i(TAG, "##### Android 5- App: " + name + "     packageName: " + packageName);
+                                JSONObject appStats = getTrafficStats(uid, name, packageName, encodedImage);
+                                if (appStats != null) apps.put(appStats);
+                            } else {
+                                // Android 6+
+                                Log.i(TAG, "##### Android 6+ App: " + name + "     packageName: " + packageName);
+                                JSONObject appStats = getNetworkManagerStats(uid, name, packageName, encodedImage, startDate, endDate);
+                                if (appStats != null) apps.put(appStats);
                             }
-
-                            //break;
+                        } catch (PackageManager.NameNotFoundException e) {
+                            Log.e(TAG, "Error getting application info: " + e.getMessage(), e);
                         }
+
                     }
                 }
 
@@ -244,7 +243,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
         double gsmBytesRx = (double) networkStatsHelper.getPackageRxBytesMobile(getReactApplicationContext()) + networkStatsHelper.getPackageRxBytesMobile(getReactApplicationContext(), startDate, endDate);
         double gsmBytesTx = (double) networkStatsHelper.getPackageTxBytesMobile(getReactApplicationContext()) + networkStatsHelper.getPackageRxBytesMobile(getReactApplicationContext(), startDate, endDate);
         double total = gsmBytesRx + gsmBytesTx;
-        Log.i(TAG, "getNetworkManagerStats - " + packageName + " - tx: " + gsmBytesTx + " | rx: " + gsmBytesRx + " | total: " + total);
+        Log.i(TAG, "##### getNetworkManagerStats - " + packageName + " - tx: " + gsmBytesTx + " | rx: " + gsmBytesRx + " | total: " + total);
 
         try {
             if (total > 0D) {
@@ -272,7 +271,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
 
         try {
             if (total > 0) {
-                Log.i(TAG, "getTrafficStats - " + packageName + " - tx: " + tx + " | rx: " + rx + " | total: " + total);
+                Log.i(TAG, "##### getTrafficStats - " + packageName + " - tx: " + tx + " | rx: " + rx + " | total: " + total);
                 return new JSONObject().put("name", name)
                                         .put("packageName", packageName)
                                         .put("rx", rx)
