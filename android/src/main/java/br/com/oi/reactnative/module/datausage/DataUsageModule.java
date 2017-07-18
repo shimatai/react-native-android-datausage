@@ -338,7 +338,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
             }
 
             try {
-                callback.invoke(null, new JSONObject().put("permissions", true));
+                callback.invoke(null, new JSONObject().put("permissions", true).toString());
             } catch (JSONException e) {
                 Log.e(TAG, "Error requesting permissions: " + e.getMessage(), e);
             }
