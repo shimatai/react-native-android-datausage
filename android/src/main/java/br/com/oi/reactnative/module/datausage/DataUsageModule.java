@@ -1,7 +1,10 @@
 package br.com.oi.reactnative.module.datausage;
 
+import android.annotation.TargetApi;
+import android.app.AppOpsManager;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -12,7 +15,8 @@ import android.graphics.drawable.Drawable;
 import android.net.TrafficStats;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.text.TextUtils;
+import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.util.Base64;
 import android.util.Log;
 
@@ -39,6 +43,7 @@ import static android.content.pm.PackageManager.GET_META_DATA;
 public class DataUsageModule extends ReactContextBaseJavaModule {
 
     private static final String TAG = "DataUsageModule";
+    private static final int READ_PHONE_STATE_REQUEST = 37;
 
     public DataUsageModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -317,6 +322,77 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
         drawable.draw(canvas);
 
         return bitmap;
+    }
+
+    @ReactMethod
+    public void requestPermissions(final ReadableMap map, final Callback callback) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            if (!hasPermissionToReadNetworkHistory()) {
+                return;
+            }
+
+            if (!hasPermissionToReadPhoneStats()) {
+                requestPhoneStateStats();
+                return;
+            }
+
+            try {
+                callback.invoke(null, new JSONObject().put("permissions", true));
+            } catch (JSONException e) {
+                Log.e(TAG, "Error requesting permissions: " + e.getMessage(), e);
+            }
+        }
+    }
+
+    private boolean hasPermissionToReadNetworkHistory() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return true;
+        }
+        final AppOpsManager appOps = (AppOpsManager) getCurrentActivity().getSystemService(Context.APP_OPS_SERVICE);
+        int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
+                android.os.Process.myUid(), getCurrentActivity().getPackageName());
+        if (mode == AppOpsManager.MODE_ALLOWED) {
+            return true;
+        }
+        appOps.startWatchingMode(AppOpsManager.OPSTR_GET_USAGE_STATS,
+                getCurrentActivity().getApplicationContext().getPackageName(),
+                new AppOpsManager.OnOpChangedListener() {
+                    @Override
+                    @TargetApi(Build.VERSION_CODES.M)
+                    public void onOpChanged(String op, String packageName) {
+                        int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), getCurrentActivity().getPackageName());
+                        if (mode != AppOpsManager.MODE_ALLOWED) {
+                            return;
+                        }
+                        appOps.stopWatchingMode(this);
+                        Intent intent = new Intent(getCurrentActivity(), getCurrentActivity().getClass());
+                        if (getCurrentActivity().getIntent().getExtras() != null) {
+                            intent.putExtras(getCurrentActivity().getIntent().getExtras());
+                        }
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        getCurrentActivity().getApplicationContext().startActivity(intent);
+                    }
+                });
+        requestReadNetworkHistoryAccess();
+        return false;
+    }
+
+    private boolean hasPermissionToReadPhoneStats() {
+        if (ActivityCompat.checkSelfPermission(getCurrentActivity(), android.Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_DENIED) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private void requestReadNetworkHistoryAccess() {
+        Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+        getCurrentActivity().startActivity(intent);
+    }
+
+    private void requestPhoneStateStats() {
+        ActivityCompat.requestPermissions(getCurrentActivity(), new String[]{ android.Manifest.permission.READ_PHONE_STATE }, READ_PHONE_STATE_REQUEST);
     }
 
 }
