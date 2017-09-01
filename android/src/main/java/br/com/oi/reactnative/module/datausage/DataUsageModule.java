@@ -328,11 +328,13 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
     public void requestPermissions(final ReadableMap map, final Callback callback) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
-            if (!hasPermissionToReadNetworkHistory()) {
+            boolean requestPermission = map.hasKey("requestPermission") ? map.getBoolean("requestPermission") : true;
+
+            if (!hasPermissionToReadNetworkHistory(requestPermission)) {
                 return;
             }
 
-            if (!hasPermissionToReadPhoneStats()) {
+            if (requestPermission && !hasPermissionToReadPhoneStats()) {
                 requestPhoneStateStats();
                 return;
             }
@@ -345,7 +347,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
         }
     }
 
-    private boolean hasPermissionToReadNetworkHistory() {
+    private boolean hasPermissionToReadNetworkHistory(boolean requestPermission) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return true;
         }
@@ -374,7 +376,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
                         getCurrentActivity().getApplicationContext().startActivity(intent);
                     }
                 });
-        requestReadNetworkHistoryAccess();
+        if (requestPermission) requestReadNetworkHistoryAccess();
         return false;
     }
 
