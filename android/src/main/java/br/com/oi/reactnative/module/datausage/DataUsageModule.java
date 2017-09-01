@@ -328,7 +328,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
     public void requestPermissions(final ReadableMap map, final Callback callback) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
-            boolean requestPermission = map.hasKey("requestPermission") ? map.getBoolean("requestPermission") : true;
+            boolean requestPermission = map.hasKey("requestPermission") ? Boolean.parseBoolean(map.getString("requestPermission")) : true;
 
             if (!hasPermissionToReadNetworkHistory(requestPermission)) {
                 return;
