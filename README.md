@@ -206,6 +206,23 @@ There are many ways to do this, here's the way I do it:
 		    }
             }
         });
+
+        // Check if app has permission to access data usage by apps
+        // This way will not ask for permissions (check only)
+        // If you pass "requestPermission": "true", then app will ask for permissions.
+        NativeModules.DataUsageModule.requestPermissions({ "requestPermission": "false" }, (err, result) => {
+            var permissionObj = JSON.parse(result);
+            if (!permissionObj.permissions) {
+                Alert.alert('Give Permission', 
+                            'You need to enable data usage access for this app. Please, enable it on the next screen.',
+                        [
+                            { text: 'Cancel', style: 'cancel', onPress: () => Actions.pop() },
+                            { text: 'Give permission', onPress: () => this.requestPermissions() }
+                        ],
+                        { cancelable: false });
+            }
+        });
     }
     ```
+
 

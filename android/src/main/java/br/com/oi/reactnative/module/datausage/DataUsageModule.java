@@ -329,16 +329,23 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
             boolean requestPermission = map.hasKey("requestPermission") ? Boolean.parseBoolean(map.getString("requestPermission")) : true;
+            try {
+                if (!hasPermissionToReadNetworkHistory(requestPermission)) {
+                    callback.invoke(null, new JSONObject().put("permissions", hasPermissionToReadNetworkHistory(false)).toString());
+                    return;
+                }
 
-            if (!hasPermissionToReadNetworkHistory(requestPermission)) {
-                return;
+                if (requestPermission && !hasPermissionToReadPhoneStats()) {
+                    requestPhoneStateStats();
+                    callback.invoke(null, new JSONObject().put("permissions", hasPermissionToReadPhoneStats()).toString());
+                    return;
+                }
+
+                callback.invoke(null, new JSONObject().put("permissions", true).toString());
+            } catch (JSONException e) {
+                Log.e(TAG, "Error requesting permissions: " + e.getMessage(), e);
             }
-
-            if (requestPermission && !hasPermissionToReadPhoneStats()) {
-                requestPhoneStateStats();
-                return;
-            }
-
+        } else {
             try {
                 callback.invoke(null, new JSONObject().put("permissions", true).toString());
             } catch (JSONException e) {
