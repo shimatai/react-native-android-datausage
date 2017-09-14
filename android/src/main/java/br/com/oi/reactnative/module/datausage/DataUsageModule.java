@@ -5,6 +5,7 @@ import android.app.AppOpsManager;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -16,6 +17,7 @@ import android.graphics.drawable.Drawable;
 import android.net.TrafficStats;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.util.Base64;
@@ -392,22 +394,17 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
 
             boolean requestPermission = map.hasKey("requestPermission") ? Boolean.parseBoolean(map.getString("requestPermission")) : true;
             try {
-                Log.i(TAG, "##### Verificar hasPermissionToReadNetworkHistory");
                 if (!hasPermissionToReadNetworkHistory(requestPermission)) {
-                    Log.i(TAG, "##### hasPermissionToReadNetworkHistory?  false");
                     callback.invoke(null, new JSONObject().put("permissions", hasPermissionToReadNetworkHistory(false)).toString());
                     return;
                 }
 
-                Log.i(TAG, "##### Verificar hasPermissionToReadPhoneStats");
                 if (requestPermission && !hasPermissionToReadPhoneStats()) {
-                    Log.i(TAG, "##### hasPermissionToReadPhoneStats?  false");
                     requestPhoneStateStats();
                     callback.invoke(null, new JSONObject().put("permissions", hasPermissionToReadPhoneStats()).toString());
                     return;
                 }
 
-                Log.i(TAG, "##### hasPermissionToReadNetworkHistory && hasPermissionToReadPhoneStats OK");
                 callback.invoke(null, new JSONObject().put("permissions", true).toString());
             } catch (JSONException e) {
                 Log.e(TAG, "Error requesting permissions: " + e.getMessage(), e);
