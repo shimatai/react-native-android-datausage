@@ -185,6 +185,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
+                Date dataIni = new Date();
                 Log.i(TAG, "##### Listar todos os aplicativos por uso de dados...");
                 Context context = getReactApplicationContext();
 
@@ -196,7 +197,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
 
                 final List<PackageInfo> packageInfoList = packageManager.getInstalledPackages(PackageManager.GET_PERMISSIONS);
                 for (PackageInfo packageInfo : packageInfoList) {
-                    if (packageInfo.requestedPermissions == null)
+                    if (packageInfo.requestedPermissions == null || isSystemPackage(packageInfo))
                         continue;
 
                     List<String> permissions = Arrays.asList(packageInfo.requestedPermissions);
@@ -231,6 +232,61 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
 
                     }
                 }
+
+                long seconds = new Date().getTime() - dataIni.getTime();
+                Log.i(TAG, "##### listDataUsageByApps - Tempo de execucao: " + seconds + " segundos");
+
+                callback.invoke(null, apps.toString());
+            }
+        });
+    }
+
+    @ReactMethod
+    public void listDataUsageByApps2(final ReadableMap map, final Callback callback) {
+        Log.i(TAG, "##### Entrei em listDataUsageByApps2(" + map.toString() + ")");
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                Date dataIni = new Date();
+                Log.i(TAG, "##### Listar todos os aplicativos por uso de dados...");
+                Context context = getReactApplicationContext();
+
+                final PackageManager packageManager = getReactApplicationContext().getPackageManager();
+                JSONArray apps = new JSONArray();
+                Date startDate = map.hasKey("startDate") ? new Date(Double.valueOf(map.getDouble("startDate")).longValue()) : null;
+                Date endDate = map.hasKey("endDate") ? new Date(Double.valueOf(map.getDouble("endDate")).longValue()) : null;
+
+                final List<ApplicationInfo> packageInfoList = packageManager.getInstalledApplications(packageManager.GET_META_DATA);
+                for (ApplicationInfo appInfo : packageInfoList) {
+                    int uid = appInfo.uid;
+                    String packageName = appInfo.packageName;
+                    Log.i(TAG, "##### Package name: " + packageName);
+
+                    try {
+                        String name = (String) packageManager.getApplicationLabel(appInfo);
+                        Drawable icon = packageManager.getApplicationIcon(appInfo);
+
+                        Bitmap bitmap = drawableToBitmap(icon);
+                        String encodedImage = encodeBitmapToBase64(bitmap);
+
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                            // < Android 6.0
+                            Log.i(TAG, "##### Android 5- App: " + name + "     packageName: " + packageName);
+                            JSONObject appStats = getTrafficStats(uid, name, packageName, encodedImage);
+                            if (appStats != null) apps.put(appStats);
+                        } else {
+                            // Android 6+
+                            Log.i(TAG, "##### Android 6+ App: " + name + "     packageName: " + packageName);
+                            JSONObject appStats = getNetworkManagerStats(uid, name, packageName, encodedImage, startDate, endDate);
+                            if (appStats != null) apps.put(appStats);
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error getting application info: " + e.getMessage(), e);
+                    }
+                }
+
+                long seconds = new Date().getTime() - dataIni.getTime();
+                Log.i(TAG, "##### listDataUsageByApps2 - Tempo de execucao: " + seconds + " segundos");
 
                 callback.invoke(null, apps.toString());
             }
@@ -359,8 +415,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
             return true;
         }
         final AppOpsManager appOps = (AppOpsManager) getCurrentActivity().getSystemService(Context.APP_OPS_SERVICE);
-        int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
-                android.os.Process.myUid(), getCurrentActivity().getPackageName());
+        int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), getCurrentActivity().getPackageName());
         if (mode == AppOpsManager.MODE_ALLOWED) {
             return true;
         }
@@ -370,17 +425,21 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
                     @Override
                     @TargetApi(Build.VERSION_CODES.M)
                     public void onOpChanged(String op, String packageName) {
-                        int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), getCurrentActivity().getPackageName());
-                        if (mode != AppOpsManager.MODE_ALLOWED) {
-                            return;
+                        try {
+                            int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), getCurrentActivity().getPackageName());
+                            if (mode != AppOpsManager.MODE_ALLOWED) {
+                                return;
+                            }
+                            appOps.stopWatchingMode(this);
+                            Intent intent = new Intent(getCurrentActivity(), getCurrentActivity().getClass());
+                            if (getCurrentActivity().getIntent().getExtras() != null) {
+                                intent.putExtras(getCurrentActivity().getIntent().getExtras());
+                            }
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            getCurrentActivity().getApplicationContext().startActivity(intent);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error reading data usage statistics: " + e.getMessage(), e);
                         }
-                        appOps.stopWatchingMode(this);
-                        Intent intent = new Intent(getCurrentActivity(), getCurrentActivity().getClass());
-                        if (getCurrentActivity().getIntent().getExtras() != null) {
-                            intent.putExtras(getCurrentActivity().getIntent().getExtras());
-                        }
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        getCurrentActivity().getApplicationContext().startActivity(intent);
                     }
                 });
         if (requestPermission) requestReadNetworkHistoryAccess();
@@ -404,4 +463,15 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
         ActivityCompat.requestPermissions(getCurrentActivity(), new String[]{ android.Manifest.permission.READ_PHONE_STATE }, READ_PHONE_STATE_REQUEST);
     }
 
+    /**
+     * Return whether the given PackgeInfo represents a system package or not.
+     * User-installed packages (Market or otherwise) should not be denoted as
+     * system packages.
+     *
+     * @param pkgInfo
+     * @return
+     */
+    private boolean isSystemPackage(PackageInfo pkgInfo) {
+        return ((pkgInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) ? true : false;
+    }
 }
