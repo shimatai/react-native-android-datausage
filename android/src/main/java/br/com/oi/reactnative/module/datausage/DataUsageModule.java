@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
@@ -185,8 +186,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                Date dataIni = new Date();
-                Log.i(TAG, "##### Listar todos os aplicativos por uso de dados...");
+                Date startExecDate = new Date();
                 Context context = getReactApplicationContext();
 
                 final PackageManager packageManager = getReactApplicationContext().getPackageManager();
@@ -233,8 +233,8 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
                     }
                 }
 
-                long seconds = new Date().getTime() - dataIni.getTime();
-                Log.i(TAG, "##### listDataUsageByApps - Tempo de execucao: " + seconds + " segundos");
+                long seconds = new Date().getTime() - startExecDate.getTime();
+                Log.i(TAG, "##### Time elapsed: " + (seconds/1000L) + " seconds");
 
                 callback.invoke(null, apps.toString());
             }
@@ -243,12 +243,10 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void listDataUsageByApps2(final ReadableMap map, final Callback callback) {
-        Log.i(TAG, "##### Entrei em listDataUsageByApps2(" + map.toString() + ")");
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                Date dataIni = new Date();
-                Log.i(TAG, "##### Listar todos os aplicativos por uso de dados...");
+                Date startExecDate = new Date();
                 Context context = getReactApplicationContext();
 
                 final PackageManager packageManager = getReactApplicationContext().getPackageManager();
@@ -256,16 +254,22 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
                 Date startDate = map.hasKey("startDate") ? new Date(Double.valueOf(map.getDouble("startDate")).longValue()) : null;
                 Date endDate = map.hasKey("endDate") ? new Date(Double.valueOf(map.getDouble("endDate")).longValue()) : null;
 
-                final List<ApplicationInfo> packageInfoList = packageManager.getInstalledApplications(packageManager.GET_META_DATA);
-                for (ApplicationInfo appInfo : packageInfoList) {
-                    int uid = appInfo.uid;
-                    String packageName = appInfo.packageName;
-                    Log.i(TAG, "##### Package name: " + packageName);
-
+                Intent mainIntent = new Intent(Intent.ACTION_MAIN, null).addCategory(Intent.CATEGORY_LAUNCHER);
+                List<ResolveInfo> packages = packageManager.queryIntentActivities(mainIntent, 0);
+                for (int i = 0; i < packages.size(); i++) {
                     try {
-                        String name = (String) packageManager.getApplicationLabel(appInfo);
-                        Drawable icon = packageManager.getApplicationIcon(appInfo);
+                        ResolveInfo resolveInfo = packages.get(i);
 
+                        String packageName = resolveInfo.activityInfo.packageName;
+                        String name = resolveInfo.activityInfo.name;
+                        int uid = 0;
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                            uid = packageManager.getPackageUid(packageName, 0);
+                        } else {
+                            uid = packageManager.getApplicationInfo(packageName, 0).uid;
+                        }
+
+                        Drawable icon = resolveInfo.loadIcon(packageManager);
                         Bitmap bitmap = drawableToBitmap(icon);
                         String encodedImage = encodeBitmapToBase64(bitmap);
 
@@ -280,13 +284,14 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
                             JSONObject appStats = getNetworkManagerStats(uid, name, packageName, encodedImage, startDate, endDate);
                             if (appStats != null) apps.put(appStats);
                         }
+
                     } catch (Exception e) {
-                        Log.e(TAG, "Error getting application info: " + e.getMessage(), e);
+                        Log.e(TAG, "Error querying intent activities: " + e.getMessage(), e);
                     }
                 }
 
-                long seconds = new Date().getTime() - dataIni.getTime();
-                Log.i(TAG, "##### listDataUsageByApps2 - Tempo de execucao: " + seconds + " segundos");
+                long seconds = new Date().getTime() - startExecDate.getTime();
+                Log.i(TAG, "##### Time elapsed: " + (seconds/1000L) + " seconds");
 
                 callback.invoke(null, apps.toString());
             }
@@ -382,21 +387,27 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void requestPermissions(final ReadableMap map, final Callback callback) {
+        Log.i(TAG, "##### Executando requestPermissions(" + (map != null && map.hasKey("requestPermission") ? map.getString("requestPermission") : "null") + ")");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
             boolean requestPermission = map.hasKey("requestPermission") ? Boolean.parseBoolean(map.getString("requestPermission")) : true;
             try {
+                Log.i(TAG, "##### Verificar hasPermissionToReadNetworkHistory");
                 if (!hasPermissionToReadNetworkHistory(requestPermission)) {
+                    Log.i(TAG, "##### hasPermissionToReadNetworkHistory?  false");
                     callback.invoke(null, new JSONObject().put("permissions", hasPermissionToReadNetworkHistory(false)).toString());
                     return;
                 }
 
+                Log.i(TAG, "##### Verificar hasPermissionToReadPhoneStats");
                 if (requestPermission && !hasPermissionToReadPhoneStats()) {
+                    Log.i(TAG, "##### hasPermissionToReadPhoneStats?  false");
                     requestPhoneStateStats();
                     callback.invoke(null, new JSONObject().put("permissions", hasPermissionToReadPhoneStats()).toString());
                     return;
                 }
 
+                Log.i(TAG, "##### hasPermissionToReadNetworkHistory && hasPermissionToReadPhoneStats OK");
                 callback.invoke(null, new JSONObject().put("permissions", true).toString());
             } catch (JSONException e) {
                 Log.e(TAG, "Error requesting permissions: " + e.getMessage(), e);
