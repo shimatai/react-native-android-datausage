@@ -45,7 +45,6 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
 
     private static final String TAG = "DataUsageModule";
     private static final int READ_PHONE_STATE_REQUEST = 37;
-    private NetworkStatsManager networkStatsManager;
 
     public DataUsageModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -64,9 +63,6 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
                 Date startExecDate = new Date();
                 final PackageManager packageManager = getReactApplicationContext().getPackageManager();
                 JSONArray apps = new JSONArray();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    networkStatsManager = (NetworkStatsManager) getReactApplicationContext().getSystemService(Context.NETWORK_STATS_SERVICE);
-                }
                 try {
                     ReadableArray packageNames = map.hasKey("packages") ? map.getArray("packages") : null;
                     Date startDate = map.hasKey("startDate") ? new Date(Double.valueOf(map.getDouble("startDate")).longValue()) : null;
@@ -90,6 +86,60 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
 
                             Bitmap bitmap = drawableToBitmap(icon);
                             String encodedImage = encodeBitmapToBase64(bitmap);
+
+                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                                // < Android 6.0
+                                Log.i(TAG, "##### Android 5- App: " + name + "     packageName: " + packageName);
+                                JSONObject appStats = getTrafficStats(uid, name, packageName, encodedImage);
+                                if (appStats != null) apps.put(appStats);
+                            } else {
+                                // Android 6+
+                                Log.i(TAG, "##### Android 6+ App: " + name + "     packageName: " + packageName);
+                                JSONObject appStats = getNetworkManagerStats(uid, name, packageName, encodedImage, startDate, endDate);
+                                if (appStats != null) apps.put(appStats);
+                            }
+                        }
+                    }
+                } catch (PackageManager.NameNotFoundException e) {
+                    Log.e(TAG, "Error getting app info: " + e.getMessage(), e);
+                }
+
+                long seconds = new Date().getTime() - startExecDate.getTime();
+                Log.i(TAG, "##### Time elapsed - getDataUsageByApp: " + (seconds/1000L) + " seconds");
+
+                callback.invoke(null, apps.toString());
+            }
+        });
+    }
+
+    @ReactMethod
+    public void getDataUsageByAppNoIcon(final ReadableMap map, final Callback callback) {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                Date startExecDate = new Date();
+                final PackageManager packageManager = getReactApplicationContext().getPackageManager();
+                JSONArray apps = new JSONArray();
+                try {
+                    ReadableArray packageNames = map.hasKey("packages") ? map.getArray("packages") : null;
+                    Date startDate = map.hasKey("startDate") ? new Date(Double.valueOf(map.getDouble("startDate")).longValue()) : null;
+                    Date endDate = map.hasKey("endDate") ? new Date(Double.valueOf(map.getDouble("endDate")).longValue()) : null;
+
+                    if (packageNames != null && packageNames.size() > 0) {
+                        for (int i = 0; i < packageNames.size(); i++) {
+                            String packageName = packageNames.getString(i);
+                            final PackageInfo packageInfo = packageManager.getPackageInfo(packageName, GET_META_DATA);
+                            int uid = packageInfo.applicationInfo.uid;
+
+                            ApplicationInfo appInfo = null;
+                            try {
+                                appInfo = packageManager.getApplicationInfo(packageName, 0);
+                            } catch (PackageManager.NameNotFoundException e) {
+                                Log.e(TAG, "Error getting application info: " + e.getMessage(), e);
+                            }
+
+                            String name = (String) packageManager.getApplicationLabel(appInfo);
+                            String encodedImage = null;
 
                             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                                 // < Android 6.0
@@ -359,7 +409,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
 
     private JSONObject getNetworkManagerStats(int uid, String name, String packageName, String encodedImage, Date startDate, Date endDate) {
         //Log.i(TAG, "##### Step getNetworkManagerStats(" + uid + ", " + name + ", ...)");
-        //NetworkStatsManager networkStatsManager = (NetworkStatsManager) getReactApplicationContext().getSystemService(Context.NETWORK_STATS_SERVICE);
+        NetworkStatsManager networkStatsManager = (NetworkStatsManager) getReactApplicationContext().getSystemService(Context.NETWORK_STATS_SERVICE);
         NetworkStatsHelper networkStatsHelper = new NetworkStatsHelper(networkStatsManager, uid);
 
         //long wifiBytesRx = networkStatsHelper.getAllRxBytesMobile(getReactApplicationContext()) + networkStatsHelper.getAllRxBytesWifi();
