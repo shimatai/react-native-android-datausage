@@ -5,7 +5,6 @@ import android.app.AppOpsManager;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -17,7 +16,6 @@ import android.graphics.drawable.Drawable;
 import android.net.TrafficStats;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.util.Base64;
@@ -47,6 +45,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
 
     private static final String TAG = "DataUsageModule";
     private static final int READ_PHONE_STATE_REQUEST = 37;
+    private NetworkStatsManager networkStatsManager;
 
     public DataUsageModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -62,8 +61,12 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
+                Date startExecDate = new Date();
                 final PackageManager packageManager = getReactApplicationContext().getPackageManager();
                 JSONArray apps = new JSONArray();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    networkStatsManager = (NetworkStatsManager) getReactApplicationContext().getSystemService(Context.NETWORK_STATS_SERVICE);
+                }
                 try {
                     ReadableArray packageNames = map.hasKey("packages") ? map.getArray("packages") : null;
                     Date startDate = map.hasKey("startDate") ? new Date(Double.valueOf(map.getDouble("startDate")).longValue()) : null;
@@ -104,6 +107,9 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.e(TAG, "Error getting app info: " + e.getMessage(), e);
                 }
+
+                long seconds = new Date().getTime() - startExecDate.getTime();
+                Log.i(TAG, "##### Time elapsed - getDataUsageByApp: " + (seconds/1000L) + " seconds");
 
                 callback.invoke(null, apps.toString());
             }
@@ -244,6 +250,57 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void getAppList(final ReadableMap map, final Callback callback) {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                Date startExecDate = new Date();
+
+                final PackageManager packageManager = getReactApplicationContext().getPackageManager();
+                JSONArray apps = new JSONArray();
+
+                final List<PackageInfo> packageInfoList = packageManager.getInstalledPackages(PackageManager.GET_PERMISSIONS);
+                for (PackageInfo packageInfo : packageInfoList) {
+                    if (packageInfo.requestedPermissions == null || isSystemPackage(packageInfo))
+                        continue;
+
+                    List<String> permissions = Arrays.asList(packageInfo.requestedPermissions);
+                    if (permissions.contains(android.Manifest.permission.INTERNET)) {
+                        int uid = packageInfo.applicationInfo.uid;
+                        String packageName = packageInfo.packageName;
+
+                        ApplicationInfo appInfo = null;
+                        try {
+                            appInfo = packageManager.getApplicationInfo(packageName, 0);
+
+                            String name = (String) packageManager.getApplicationLabel(appInfo);
+                            apps.put(new JSONObject().put("name", name)
+                                                     .put("packageName", packageName)
+                                                     .put("uid", uid));
+
+                            /*
+                            Drawable icon = packageManager.getApplicationIcon(appInfo);
+                            Bitmap bitmap = drawableToBitmap(icon);
+                            String encodedImage = encodeBitmapToBase64(bitmap);
+                            */
+
+                        } catch (PackageManager.NameNotFoundException e) {
+                            Log.e(TAG, "Error getting application info: " + e.getMessage(), e);
+                        } catch (JSONException e) {
+                            Log.e(TAG, "Error parsing JSONObject: " + e.getMessage(), e);
+                        }
+                    }
+                }
+
+                long seconds = new Date().getTime() - startExecDate.getTime();
+                Log.i(TAG, "##### Time elapsed: " + (seconds/1000L) + " seconds");
+
+                callback.invoke(null, apps.toString());
+            }
+        });
+    }
+
+    @ReactMethod
     public void listDataUsageByApps2(final ReadableMap map, final Callback callback) {
         AsyncTask.execute(new Runnable() {
             @Override
@@ -302,7 +359,7 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
 
     private JSONObject getNetworkManagerStats(int uid, String name, String packageName, String encodedImage, Date startDate, Date endDate) {
         //Log.i(TAG, "##### Step getNetworkManagerStats(" + uid + ", " + name + ", ...)");
-        NetworkStatsManager networkStatsManager = (NetworkStatsManager) getReactApplicationContext().getSystemService(Context.NETWORK_STATS_SERVICE);
+        //NetworkStatsManager networkStatsManager = (NetworkStatsManager) getReactApplicationContext().getSystemService(Context.NETWORK_STATS_SERVICE);
         NetworkStatsHelper networkStatsHelper = new NetworkStatsHelper(networkStatsManager, uid);
 
         //long wifiBytesRx = networkStatsHelper.getAllRxBytesMobile(getReactApplicationContext()) + networkStatsHelper.getAllRxBytesWifi();
@@ -437,6 +494,9 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
                             int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), getCurrentActivity().getPackageName());
                             if (mode != AppOpsManager.MODE_ALLOWED) {
                                 return;
+
+
+
                             }
                             appOps.stopWatchingMode(this);
                             Intent intent = new Intent(getCurrentActivity(), getCurrentActivity().getClass());
