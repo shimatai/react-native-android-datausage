@@ -71,37 +71,42 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
                     if (packageNames != null && packageNames.size() > 0) {
                         for (int i = 0; i < packageNames.size(); i++) {
                             String packageName = packageNames.getString(i);
-                            final PackageInfo packageInfo = packageManager.getPackageInfo(packageName, GET_META_DATA);
-                            int uid = packageInfo.applicationInfo.uid;
 
-                            ApplicationInfo appInfo = null;
                             try {
-                                appInfo = packageManager.getApplicationInfo(packageName, 0);
+                                final PackageInfo packageInfo = packageManager.getPackageInfo(packageName, GET_META_DATA);
+                                int uid = packageInfo.applicationInfo.uid;
+
+                                ApplicationInfo appInfo = null;
+                                try {
+                                    appInfo = packageManager.getApplicationInfo(packageName, 0);
+                                } catch (PackageManager.NameNotFoundException e) {
+                                    Log.e(TAG, "Error getting application info: " + e.getMessage(), e);
+                                }
+
+                                String name = (String) packageManager.getApplicationLabel(appInfo);
+                                Drawable icon = packageManager.getApplicationIcon(appInfo);
+
+                                Bitmap bitmap = drawableToBitmap(icon);
+                                String encodedImage = encodeBitmapToBase64(bitmap);
+
+                                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                                    // < Android 6.0
+                                    Log.i(TAG, "##### Android 5- App: " + name + "     packageName: " + packageName);
+                                    JSONObject appStats = getTrafficStats(uid, name, packageName, encodedImage);
+                                    if (appStats != null) apps.put(appStats);
+                                } else {
+                                    // Android 6+
+                                    Log.i(TAG, "##### Android 6+ App: " + name + "     packageName: " + packageName);
+                                    JSONObject appStats = getNetworkManagerStats(uid, name, packageName, encodedImage, startDate, endDate);
+                                    if (appStats != null) apps.put(appStats);
+                                }
                             } catch (PackageManager.NameNotFoundException e) {
-                                Log.e(TAG, "Error getting application info: " + e.getMessage(), e);
-                            }
-
-                            String name = (String) packageManager.getApplicationLabel(appInfo);
-                            Drawable icon = packageManager.getApplicationIcon(appInfo);
-
-                            Bitmap bitmap = drawableToBitmap(icon);
-                            String encodedImage = encodeBitmapToBase64(bitmap);
-
-                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                                // < Android 6.0
-                                Log.i(TAG, "##### Android 5- App: " + name + "     packageName: " + packageName);
-                                JSONObject appStats = getTrafficStats(uid, name, packageName, encodedImage);
-                                if (appStats != null) apps.put(appStats);
-                            } else {
-                                // Android 6+
-                                Log.i(TAG, "##### Android 6+ App: " + name + "     packageName: " + packageName);
-                                JSONObject appStats = getNetworkManagerStats(uid, name, packageName, encodedImage, startDate, endDate);
-                                if (appStats != null) apps.put(appStats);
+                                Log.e(TAG, "Error getting app info: " + e.getMessage(), e);
                             }
                         }
                     }
-                } catch (PackageManager.NameNotFoundException e) {
-                    Log.e(TAG, "Error getting app info: " + e.getMessage(), e);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error processing app list: " + e.getMessage(), e);
                 }
 
                 long seconds = new Date().getTime() - startExecDate.getTime();
@@ -128,34 +133,39 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
                     if (packageNames != null && packageNames.size() > 0) {
                         for (int i = 0; i < packageNames.size(); i++) {
                             String packageName = packageNames.getString(i);
-                            final PackageInfo packageInfo = packageManager.getPackageInfo(packageName, GET_META_DATA);
-                            int uid = packageInfo.applicationInfo.uid;
 
-                            ApplicationInfo appInfo = null;
                             try {
-                                appInfo = packageManager.getApplicationInfo(packageName, 0);
+                                final PackageInfo packageInfo = packageManager.getPackageInfo(packageName, GET_META_DATA);
+                                int uid = packageInfo.applicationInfo.uid;
+
+                                ApplicationInfo appInfo = null;
+                                try {
+                                    appInfo = packageManager.getApplicationInfo(packageName, 0);
+                                } catch (PackageManager.NameNotFoundException e) {
+                                    Log.e(TAG, "Error getting application info: " + e.getMessage(), e);
+                                }
+
+                                String name = (String) packageManager.getApplicationLabel(appInfo);
+                                String encodedImage = null;
+
+                                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                                    // < Android 6.0
+                                    Log.i(TAG, "##### Android 5- App: " + name + "     packageName: " + packageName);
+                                    JSONObject appStats = getTrafficStats(uid, name, packageName, encodedImage);
+                                    if (appStats != null) apps.put(appStats);
+                                } else {
+                                    // Android 6+
+                                    Log.i(TAG, "##### Android 6+ App: " + name + "     packageName: " + packageName);
+                                    JSONObject appStats = getNetworkManagerStats(uid, name, packageName, encodedImage, startDate, endDate);
+                                    if (appStats != null) apps.put(appStats);
+                                }
                             } catch (PackageManager.NameNotFoundException e) {
-                                Log.e(TAG, "Error getting application info: " + e.getMessage(), e);
-                            }
-
-                            String name = (String) packageManager.getApplicationLabel(appInfo);
-                            String encodedImage = null;
-
-                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                                // < Android 6.0
-                                Log.i(TAG, "##### Android 5- App: " + name + "     packageName: " + packageName);
-                                JSONObject appStats = getTrafficStats(uid, name, packageName, encodedImage);
-                                if (appStats != null) apps.put(appStats);
-                            } else {
-                                // Android 6+
-                                Log.i(TAG, "##### Android 6+ App: " + name + "     packageName: " + packageName);
-                                JSONObject appStats = getNetworkManagerStats(uid, name, packageName, encodedImage, startDate, endDate);
-                                if (appStats != null) apps.put(appStats);
+                                Log.e(TAG, "Error getting app info: " + e.getMessage(), e);
                             }
                         }
                     }
-                } catch (PackageManager.NameNotFoundException e) {
-                    Log.e(TAG, "Error getting app info: " + e.getMessage(), e);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error processing app list: " + e.getMessage(), e);
                 }
 
                 long seconds = new Date().getTime() - startExecDate.getTime();
