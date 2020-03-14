@@ -1,6 +1,7 @@
 package br.com.oi.reactnative.module.datausage;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AppOpsManager;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
@@ -539,19 +540,24 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return true;
         }
-        final AppOpsManager appOps = (AppOpsManager) getCurrentActivity().getSystemService(Context.APP_OPS_SERVICE);
-        int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), getCurrentActivity().getPackageName());
+        final Activity activity = getCurrentActivity();
+        if (activity == null) {
+            Log.w(TAG, "Could not read network history permission: current activity is null.");
+            return false;
+        }
+        final AppOpsManager appOps = (AppOpsManager) activity.getSystemService(Context.APP_OPS_SERVICE);
+        int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), activity.getPackageName());
         if (mode == AppOpsManager.MODE_ALLOWED) {
             return true;
         }
         appOps.startWatchingMode(AppOpsManager.OPSTR_GET_USAGE_STATS,
-                getCurrentActivity().getApplicationContext().getPackageName(),
+                activity.getApplicationContext().getPackageName(),
                 new AppOpsManager.OnOpChangedListener() {
                     @Override
                     @TargetApi(Build.VERSION_CODES.M)
                     public void onOpChanged(String op, String packageName) {
                         try {
-                            int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), getCurrentActivity().getPackageName());
+                            int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), activity.getPackageName());
                             if (mode != AppOpsManager.MODE_ALLOWED) {
                                 return;
 
@@ -559,12 +565,12 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
 
                             }
                             appOps.stopWatchingMode(this);
-                            Intent intent = new Intent(getCurrentActivity(), getCurrentActivity().getClass());
-                            if (getCurrentActivity().getIntent().getExtras() != null) {
-                                intent.putExtras(getCurrentActivity().getIntent().getExtras());
+                            Intent intent = new Intent(activity, activity.getClass());
+                            if (activity.getIntent().getExtras() != null) {
+                                intent.putExtras(activity.getIntent().getExtras());
                             }
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            getCurrentActivity().getApplicationContext().startActivity(intent);
+                            activity.getApplicationContext().startActivity(intent);
                         } catch (Exception e) {
                             Log.e(TAG, "Error reading data usage statistics: " + e.getMessage(), e);
                         }
