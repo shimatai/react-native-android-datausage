@@ -34,7 +34,7 @@ public class NetworkStatsHelper {
         NetworkStats.Bucket bucket;
         try {
             bucket = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE,
-                                null,
+                                getSubscriberId(context, ConnectivityManager.TYPE_MOBILE),
                                 startDate != null ? startDate.getTime() : 0,
                                 endDate != null ? endDate.getTime() : System.currentTimeMillis());
         } catch (RemoteException e) {
@@ -51,7 +51,7 @@ public class NetworkStatsHelper {
         NetworkStats.Bucket bucket;
         try {
             bucket = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE,
-                                    null,
+                                    getSubscriberId(context, ConnectivityManager.TYPE_MOBILE),
                                     startDate != null ? startDate.getTime() : 0,
                                     endDate != null ? endDate.getTime() : System.currentTimeMillis());
         } catch (RemoteException e) {
@@ -68,7 +68,7 @@ public class NetworkStatsHelper {
         NetworkStats.Bucket bucket;
         try {
             bucket = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_WIFI,
-                                "",
+                                null,
                                 startDate != null ? startDate.getTime() : 0,
                                 endDate != null ? endDate.getTime() : System.currentTimeMillis());
         } catch (RemoteException e) {
@@ -85,7 +85,7 @@ public class NetworkStatsHelper {
         NetworkStats.Bucket bucket;
         try {
             bucket = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_WIFI,
-                    "",
+                    null,
                     startDate != null ? startDate.getTime() : 0,
                     endDate != null ? endDate.getTime() : System.currentTimeMillis());
         } catch (RemoteException e) {
@@ -103,7 +103,7 @@ public class NetworkStatsHelper {
         try {
             networkStats = networkStatsManager.queryDetailsForUid(
                                     ConnectivityManager.TYPE_MOBILE,
-                                    null,
+                                    getSubscriberId(context, ConnectivityManager.TYPE_MOBILE),
                                     startDate != null ? startDate.getTime() : 0,
                                     endDate != null ? endDate.getTime() : System.currentTimeMillis(),
                                     packageUid);
@@ -127,7 +127,7 @@ public class NetworkStatsHelper {
         try {
             networkStats = networkStatsManager.queryDetailsForUid(
                                 ConnectivityManager.TYPE_MOBILE,
-                                null,
+                                getSubscriberId(context, ConnectivityManager.TYPE_MOBILE),
                                 startDate != null ? startDate.getTime() : 0,
                                 endDate != null ? endDate.getTime() : System.currentTimeMillis(),
                                 packageUid);
@@ -150,7 +150,7 @@ public class NetworkStatsHelper {
         try {
             networkStats = networkStatsManager.queryDetailsForUid(
                                 ConnectivityManager.TYPE_WIFI,
-                                "",
+                                null,
                                 startDate != null ? startDate.getTime() : 0,
                                 endDate != null ? endDate.getTime() : System.currentTimeMillis(),
                     packageUid);
@@ -173,7 +173,7 @@ public class NetworkStatsHelper {
         try {
             networkStats = networkStatsManager.queryDetailsForUid(
                                     ConnectivityManager.TYPE_WIFI,
-                                    "",
+                                    null,
                                     startDate != null ? startDate.getTime() : 0,
                                     endDate != null ? endDate.getTime() : System.currentTimeMillis(),
                                     packageUid);
@@ -188,11 +188,13 @@ public class NetworkStatsHelper {
     }
 
     private String getSubscriberId(Context context, int networkType) {
-        if (ConnectivityManager.TYPE_MOBILE == networkType) {
-            TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-            return tm.getSubscriberId();
+        try{
+            if (ConnectivityManager.TYPE_MOBILE == networkType) {
+                TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+                return tm.getSubscriberId();
+            }
+        } catch(Exception e) {
+            return null;
         }
-
-        return "";
     }
 }
