@@ -196,5 +196,6 @@ public class NetworkStatsHelper {
         } catch(Exception e) {
             return null;
         }
+        return null;
     }
 }
