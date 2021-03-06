@@ -139,7 +139,7 @@ public class NetworkStatsHelper {
         networkStats.getNextBucket(bucket);
         long tx = bucket.getTxBytes();
         networkStats.close();
-        Log.i("data tx:", tx);
+        Log.i("data tx:" + tx);
         return tx;
     }
 
