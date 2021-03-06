@@ -34,7 +34,7 @@ public class NetworkStatsHelper {
         NetworkStats.Bucket bucket;
         try {
             bucket = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE,
-                                getSubscriberId(context, ConnectivityManager.TYPE_MOBILE),
+                                "",
                                 startDate != null ? startDate.getTime() : 0,
                                 endDate != null ? endDate.getTime() : System.currentTimeMillis());
         } catch (RemoteException e) {
