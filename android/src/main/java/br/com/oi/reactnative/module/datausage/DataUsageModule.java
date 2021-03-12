@@ -461,11 +461,11 @@ public class DataUsageModule extends ReactContextBaseJavaModule {
                 return new JSONObject().put("name", name)
                                         .put("packageName", packageName)
                                         .put("rx", rx)
-                                        .put("received", String.format("%.2f MB", ((rx / 1024D) / 1024D) ))
+                                        .put("received", String.format("%.3f MB", ((rx / 1024D) / 1024D) ))
                                         .put("tx", tx)
-                                        .put("sent", String.format("%.2f MB", ((tx / 1024D) / 1024D) ))
+                                        .put("sent", String.format("%.3f MB", ((tx / 1024D) / 1024D) ))
                                         .put("total", total)
-                                        .put("totalMb", String.format("%.2f MB", (total / 1024D) / 1024D ))
+                                        .put("totalMb", String.format("%.3f MB", (total / 1024D) / 1024D ))
                                         .put("icon", encodedImage);
             }
         } catch (JSONException e) {
